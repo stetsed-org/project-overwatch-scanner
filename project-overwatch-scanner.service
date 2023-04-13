@@ -1,0 +1,11 @@
+[Unit]
+Description=Project Overwatch Scanner Service
+
+[Service]
+ExecStart=/website/scanner/project-overwatch-scanner
+WorkingDirectory=/website/scanner
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
