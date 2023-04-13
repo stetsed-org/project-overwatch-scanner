@@ -1,0 +1,161 @@
+{
+  "channel": "1084555656717144124",
+  "server": "http://globecraft.eu:8033/",
+  "world": "world",
+  "allylist": [
+    "BLUECHEEEZ",
+    "tobla14",
+    "KitKatMuncher",
+    "reiyax",
+    "SandLandsharks",
+    "Ugrimugri",
+    "Taxer760",
+    "Mottyjeguj",
+    "IJustAteMyDog",
+    "Colonel_Kai",
+    "Zilj",
+    "JustLeonHere",
+    "WarwaxPro",
+    "Stetsed",
+    "Joonthom",
+    "A_SkywalkerNL",
+    "RADGALF_BITGALF",
+    "mypizzasdead",
+    "ComradeFlanders",
+    "KaiserWillie",
+    "cz123cz",
+    "Amradz",
+    "ItssTasha",
+    "NotChachi",
+    "Cubs75",
+    "YinuSWinneR",
+    "SerScript",
+    "slash_zero_x",
+    "Daanosaurusrex",
+    "Karaesthetic",
+    "lucxrioo",
+    "lollill"
+  ],
+  "regions": {
+    "EAST INDIES AREA (GENERAL)": {
+      "a": [
+        6312,
+        -656
+      ],
+      "b": [
+        9108,
+        720
+      ]
+    },
+    "North Malaysia": {
+      "a": [
+        6709,
+        -579
+      ],
+      "b": [
+        7033,
+        -389
+      ]
+    },
+    "Middle Malaysia": {
+      "a": [
+        6828,
+        -388
+      ],
+      "b": [
+        7088,
+        -234
+      ]
+    },
+    "South Malaysia": {
+      "a": [
+        6916,
+        -334
+      ],
+      "b": [
+        7163,
+        -52
+      ]
+    },
+    "North Sumatra": {
+      "a": [
+        6409,
+        -405
+      ],
+      "b": [
+        6871,
+        -173
+      ]
+    },
+    "Middle Sumatra": {
+      "a": [
+        6525,
+        -173
+      ],
+      "b": [
+        6942,
+        352
+      ]
+    },
+    "South Sumatra": {
+      "a": [
+        6942,
+        -115
+      ],
+      "b": [
+        7308,
+        399
+      ]
+    },
+    "Java": {
+      "a": [
+        7900,
+        619
+      ],
+      "b": [
+        7193,
+        398
+      ]
+    },
+    "Greater Timor": {
+      "a": [
+        7924,
+        512
+      ],
+      "b": [
+        8699,
+        796
+      ]
+    },
+    "Main Sulawesi": {
+      "a": [
+        8416,
+        -103
+      ],
+      "b": [
+        8101,
+        503
+      ]
+    },
+    "Eastern Sulawesi": {
+      "a": [
+        8481,
+        90
+      ],
+      "b": [
+        8662,
+        185
+      ]
+    },
+    "South Morocco Colonial Region": {
+      "a": [
+        -931,
+        -1506
+      ],
+      "b": [
+        -1239,
+        -1775
+      ]
+    }
+  }
+}
