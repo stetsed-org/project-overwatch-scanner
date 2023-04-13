@@ -35,6 +35,7 @@ struct Player {
     account: String,
     x: f64,
     z: f64,
+    world: String,
 }
 
 #[tokio::main]
@@ -131,7 +132,8 @@ fn extract_player_info(json_string: String) -> Vec<Player> {
         let account = player["account"].as_str().unwrap().to_owned();
         let x = player["x"].as_f64().unwrap();
         let z = player["z"].as_f64().unwrap();
-        result.push(Player { account, x, z });
+        let world = player["world"].as_str().unwrap().to_owned();
+        result.push(Player { account, x, z, world});
     }
 
     result
@@ -139,11 +141,16 @@ fn extract_player_info(json_string: String) -> Vec<Player> {
 
 fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
     let mut in_our_land = Vec::new();
+    let (mut a_divisor, mut b_divisor) = (1.0, 1.0);
+    if player.world == "world_nether" {
+        a_divisor = 8.0;
+        b_divisor = 8.0;
+    }
     for (region_name, region) in &config.regions {
-        if player.x >= region.a[0] as f64
-            && player.x <= region.b[0] as f64
-            && player.z >= region.a[1] as f64
-            && player.z <= region.b[1] as f64
+        if player.x >= region.a[0] as f64 / a_divisor
+            && player.x <= region.b[0] as f64 / b_divisor
+            && player.z >= region.a[1] as f64 / a_divisor
+            && player.z <= region.b[1] as f64 / b_divisor
         {
             in_our_land.push(player.account.clone());
             break; // Assuming player can only be in one region at a time
@@ -151,7 +158,6 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
     }
     in_our_land
 }
-
 
 async fn insert_entry(pool: &MySqlPool, account: String, x: i64, z: i64) -> anyhow::Result<()> {
     let status = sqlx::query!(r#"INSERT INTO global (Name,X,Z) VALUES (?,?,?)"#, account,x,z).execute(pool).await.expect("Error inserting entry");

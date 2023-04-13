@@ -14,5 +14,5 @@ SDK: [Discord](https://github.com/serenity-rs/serenity) & [PocketBase](https://g
 - [x] Add support for overworld dimension.
 - [x] Integrate with Discord to send Alerts through a bot
 - [x] Add pocketbase support
-- [ ] Add support for the nether dimension.
+- [x] Add support for the nether dimension.
 - [ ] Move over completley from MySQL to PocketBase.
