@@ -97,7 +97,7 @@ async fn main_function() -> anyhow::Result<()> {
                 if !player_already_active {
                     print!("Somebody has entered our land hook.");
                     insert_active_entry(&pool, player.account.clone(), player.x as i64, player.z as i64).await?;
-                    send_message_to_channel(&http, channel_id, format!("{} has entered our land! <@&1084742210265813002>", player.account)).await;
+                    send_message_to_channel(&http, channel_id, format!("{} has entered our land! In {} <@&1084742210265813002>", player.account, player.world)).await;
                 }
             }
             else {
