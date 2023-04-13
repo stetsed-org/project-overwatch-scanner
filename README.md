@@ -16,4 +16,3 @@ SDK: [Discord](https://github.com/serenity-rs/serenity) & [PocketBase](https://g
 - [x] Add pocketbase support
 - [ ] Add support for the nether dimension.
 - [ ] Move over completley from MySQL to PocketBase.
-- [ ] 
