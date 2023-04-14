@@ -1,21 +1,20 @@
 mod pocketbase;
 mod sql;
+mod discord;
 
 use std::env;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use reqwest::*;
-use sqlx::mysql::MySqlPool;
 use anyhow::Result;
 use dotenv::dotenv;
-use pocketbase::pocketbase_send;
-use sql::*;
+use sqlx::mysql::MySqlPool;
+use serenity::model::id::ChannelId;
+use serenity::http::Http;
 
-use serenity::{
-    http::Http,
-    model::id::ChannelId,
-    prelude::*,
-};
+use sql::*;
+use pocketbase::*;
+use discord::*;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Configuration {
@@ -159,15 +158,4 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
         }
     }
     in_our_land
-}
-
-async fn send_message_to_channel(http: &Http, channel_id: ChannelId, content: String) {
-    let result = channel_id.say(&http, content).await;
-
-    match result {
-        Err(why) => {
-            println!("Error sending message: {:?}", why);
-        }
-        _ => (),
-    }
 }
