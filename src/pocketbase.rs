@@ -17,6 +17,6 @@ pub async fn pocketbase_send(query: Player, pb_email: String, pb_password: Strin
     let auth = client.auth_via_email(pb_email, pb_password, UserTypes::Admin /* use UserTypes::Admin for admin Authentication */).await;
     assert!(auth.is_ok());
 
-    let response = create::record::<Player>("global", &query, &client).await;
+    create::record::<Player>("global", &query, &client).await?;
     Ok(())
 }
