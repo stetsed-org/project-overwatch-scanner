@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use pocketbase_sdk::client::Client;
 use pocketbase_sdk::user::UserTypes;
 use pocketbase_sdk::records::operations::{
-  list, view, delete, create
+  create
 };
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -160,12 +160,12 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
 }
 
 async fn insert_entry(pool: &MySqlPool, account: String, x: i64, z: i64) -> anyhow::Result<()> {
-    let status = sqlx::query!(r#"INSERT INTO global (Name,X,Z) VALUES (?,?,?)"#, account,x,z).execute(pool).await.expect("Error inserting entry");
+    sqlx::query!(r#"INSERT INTO global (Name,X,Z) VALUES (?,?,?)"#, account,x,z).execute(pool).await.expect("Error inserting entry");
     Ok(())
 }
 
 async fn insert_active_entry(pool: &MySqlPool, account: String, x: i64, z: i64) -> anyhow::Result<()> {
-    let status = sqlx::query!(r#"INSERT INTO active (Name,X,Z) VALUES (?,?,?)"#, account,x,z).execute(pool).await.expect("Error inserting entry");
+    sqlx::query!(r#"INSERT INTO active (Name,X,Z) VALUES (?,?,?)"#, account,x,z).execute(pool).await.expect("Error inserting entry");
     Ok(())
 }
 
