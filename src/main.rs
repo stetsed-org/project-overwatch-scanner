@@ -8,9 +8,10 @@ use std::fs;
 use reqwest::*;
 use anyhow::Result;
 use dotenv::dotenv;
-use sqlx::mysql::MySqlPool;
 use serenity::model::id::ChannelId;
 use serenity::http::Http;
+
+use rusqlite::Connection;
 
 use sql::*;
 use pocketbase::*;
@@ -60,7 +61,25 @@ async fn main_function() -> anyhow::Result<()> {
 
     let http = Http::new(&token);
 
-    let pool: &MySqlPool = &MySqlPool::connect("mysql://data:data@truenas.selfhostable.net/data").await.expect("Failed to connect to database!");
+    let conn = Connection::open("main.db")?;
+
+    conn.execute("CREATE TABLE IF NOT EXISTS active (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT,
+        Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        X INTEGER,
+        Z INTEGER
+        )", (),
+    )?;
+
+    conn.execute("CREATE TABLE IF NOT EXISTS global (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT,
+        Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        X INTEGER,
+        Z INTEGER
+        )", (),
+    )?;
 
     let contents: String = fs::read_to_string("./configuration.json")?;
 
@@ -73,7 +92,7 @@ async fn main_function() -> anyhow::Result<()> {
 
     for player in &player_info {
         println!("Account: {}, X: {}, Z: {}", player.account, player.x, player.z);
-        insert_entry(&pool, player.account.clone(), player.x as i64, player.z as i64).await?;
+        insert_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
         let data = pocketbase::Player { account: player.account.clone(), x: player.x, z: player.z };
         pocketbase_send(data, pb_email.clone(), pb_password.clone()).await;
     }
@@ -91,30 +110,29 @@ async fn main_function() -> anyhow::Result<()> {
         }
         else{
             if in_our_land.contains(&player.account) {
-                let player_already_active = player_in_active(&pool, &player.account).await?;
+                let player_already_active = player_in_active(&conn,&player.account).await?;
                 if player_already_active {
-                    insert_active_entry(&pool, player.account.clone(), player.x as i64, player.z as i64).await?;
+                    insert_active_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
                 }
                 if !player_already_active {
                     print!("Somebody has entered our land hook.");
-                    insert_active_entry(&pool, player.account.clone(), player.x as i64, player.z as i64).await?;
+                    insert_active_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
                     send_message_to_channel(&http, channel_id, format!("{} has entered our land! In {} <@&1084742210265813002>", player.account, player.world)).await;
                 }
             }
             else {
-                let player_already_active = player_in_active(&pool, &player.account).await?;
+                let player_already_active = player_in_active(&conn,&player.account).await?;
                 if player_already_active {
                     print!("Somebody has left our land hook.");
                     print!("Put Image Logic Here to Download from database and render.");
-                    sqlx::query!(r#"DELETE FROM active WHERE Name = ?"#, player.account).execute(pool).await.expect("Error deleting entry");
+                    delete_in_active(&conn, &player.account).await?;
                     send_message_to_channel(&http, channel_id, format!("{} has left our land!", player.account)).await;
                 }
         
             }
         }
     }
-
-    pool.close().await;
+    conn.close();
 
     Ok(())
 }
