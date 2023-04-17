@@ -1,7 +1,6 @@
 use serenity::{
     http::Http,
     model::id::ChannelId,
-    prelude::*,
 };
 
 pub async fn send_message_to_channel(http: &Http, channel_id: ChannelId, content: String) {

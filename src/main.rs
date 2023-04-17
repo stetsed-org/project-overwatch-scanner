@@ -5,7 +5,6 @@ mod discord;
 use std::env;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use reqwest::*;
 use anyhow::Result;
 use dotenv::dotenv;
 use serenity::model::id::ChannelId;
