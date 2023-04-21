@@ -92,7 +92,7 @@ async fn main_function() -> anyhow::Result<()> {
     for player in &player_info {
         println!("Account: {}, X: {}, Z: {}", player.account, player.x, player.z);
         insert_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
-        let data = pocketbase::Player { account: player.account.clone(), x: player.x, z: player.z };
+        let data = pocketbase::Player { account: player.account.clone(), x: player.x, z: player.z, world: player.world.clone()};
         pocketbase_send(data, pb_email.clone(), pb_password.clone()).await;
     }
 

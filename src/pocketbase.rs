@@ -10,6 +10,7 @@ pub struct Player {
     pub account: String,
     pub x: f64,
     pub z: f64,
+    pub world: String,
 }
 
 pub async fn pocketbase_send(query: Player, pb_email: String, pb_password: String) -> Result<(), Box<dyn std::error::Error>> {
