@@ -1,20 +1,20 @@
+mod discord;
 mod pocketbase;
 mod sql;
-mod discord;
 
-use std::env;
-use serde::{Deserialize, Serialize};
-use std::fs;
 use anyhow::Result;
 use dotenv::dotenv;
-use serenity::model::id::ChannelId;
+use serde::{Deserialize, Serialize};
 use serenity::http::Http;
+use serenity::model::id::ChannelId;
+use std::env;
+use std::fs;
 
 use rusqlite::Connection;
 
-use sql::*;
-use pocketbase::*;
 use discord::*;
+use pocketbase::*;
+use sql::*;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Configuration {
@@ -48,36 +48,45 @@ async fn main() -> Result<()> {
 }
 
 async fn main_function() -> anyhow::Result<()> {
-
     dotenv().ok();
 
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let channel_id_str = env::var("DISCORD_CHANNEL_ID").expect("Expected a channel ID in the environment");
-    let channel_id = ChannelId(channel_id_str.parse::<u64>().expect("Couldn't parse channel ID"));
-    let pb_email: String = env::var("POCKETBASE_EMAIL").expect("Expected a pocketbase email in the environment");
-    let pb_password: String = env::var("POCKETBASE_PASSWORD").expect("Expected a pocketbase password in the environment");
-
+    let channel_id_str =
+        env::var("DISCORD_CHANNEL_ID").expect("Expected a channel ID in the environment");
+    let channel_id = ChannelId(
+        channel_id_str
+            .parse::<u64>()
+            .expect("Couldn't parse channel ID"),
+    );
+    let pb_email: String =
+        env::var("POCKETBASE_EMAIL").expect("Expected a pocketbase email in the environment");
+    let pb_password: String =
+        env::var("POCKETBASE_PASSWORD").expect("Expected a pocketbase password in the environment");
 
     let http = Http::new(&token);
 
     let conn = Connection::open("main.db")?;
 
-    conn.execute("CREATE TABLE IF NOT EXISTS active (
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS active (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         Name TEXT,
         Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         X INTEGER,
         Z INTEGER
-        )", (),
+        )",
+        (),
     )?;
 
-    conn.execute("CREATE TABLE IF NOT EXISTS global (
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS global (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         Name TEXT,
         Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         X INTEGER,
         Z INTEGER
-        )", (),
+        )",
+        (),
     )?;
 
     let contents: String = fs::read_to_string("./configuration.json")?;
@@ -90,9 +99,23 @@ async fn main_function() -> anyhow::Result<()> {
     let player_info = extract_player_info(raw_json.clone());
 
     for player in &player_info {
-        println!("Account: {}, X: {}, Z: {}", player.account, player.x, player.z);
-        insert_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
-        let data = pocketbase::Player { account: player.account.clone(), x: player.x, z: player.z, world: player.world.clone()};
+        println!(
+            "Account: {}, X: {}, Z: {}",
+            player.account, player.x, player.z
+        );
+        insert_entry(
+            &conn,
+            player.account.clone(),
+            player.x as i64,
+            player.z as i64,
+        )
+        .await?;
+        let data = pocketbase::Player {
+            account: player.account.clone(),
+            x: player.x,
+            z: player.z,
+            world: player.world.clone(),
+        };
         pocketbase_send(data, pb_email.clone(), pb_password.clone()).await;
     }
 
@@ -106,28 +129,50 @@ async fn main_function() -> anyhow::Result<()> {
     for player in &player_info {
         if config.allylist.contains(&player.account) {
             continue;
-        }
-        else{
+        } else {
             if in_our_land.contains(&player.account) {
-                let player_already_active = player_in_active(&conn,&player.account).await?;
+                let player_already_active = player_in_active(&conn, &player.account).await?;
                 if player_already_active {
-                    insert_active_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
+                    insert_active_entry(
+                        &conn,
+                        player.account.clone(),
+                        player.x as i64,
+                        player.z as i64,
+                    )
+                    .await?;
                 }
                 if !player_already_active {
                     print!("Somebody has entered our land hook.");
-                    insert_active_entry(&conn,player.account.clone(), player.x as i64, player.z as i64).await?;
-                    send_message_to_channel(&http, channel_id, format!("{} has entered our land! In {} <@&1084742210265813002>", player.account, player.world)).await;
+                    insert_active_entry(
+                        &conn,
+                        player.account.clone(),
+                        player.x as i64,
+                        player.z as i64,
+                    )
+                    .await?;
+                    send_message_to_channel(
+                        &http,
+                        channel_id,
+                        format!(
+                            "{} has entered our land! In {} <@&1084742210265813002>",
+                            player.account, player.world
+                        ),
+                    )
+                    .await;
                 }
-            }
-            else {
-                let player_already_active = player_in_active(&conn,&player.account).await?;
+            } else {
+                let player_already_active = player_in_active(&conn, &player.account).await?;
                 if player_already_active {
                     print!("Somebody has left our land hook.");
                     print!("Put Image Logic Here to Download from database and render.");
                     delete_in_active(&conn, &player.account).await?;
-                    send_message_to_channel(&http, channel_id, format!("{} has left our land!", player.account)).await;
+                    send_message_to_channel(
+                        &http,
+                        channel_id,
+                        format!("{} has left our land!", player.account),
+                    )
+                    .await;
                 }
-        
             }
         }
     }
@@ -151,7 +196,12 @@ fn extract_player_info(json_string: String) -> Vec<Player> {
         let x = player["x"].as_f64().unwrap();
         let z = player["z"].as_f64().unwrap();
         let world = player["world"].as_str().unwrap().to_owned();
-        result.push(Player { account, x, z, world});
+        result.push(Player {
+            account,
+            x,
+            z,
+            world,
+        });
     }
 
     result

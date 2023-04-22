@@ -1,9 +1,7 @@
-use serde::{Serialize, Deserialize};
 use pocketbase_sdk::client::Client;
+use pocketbase_sdk::records::operations::create;
 use pocketbase_sdk::user::UserTypes;
-use pocketbase_sdk::records::operations::{
-  create
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Player {
@@ -13,9 +11,20 @@ pub struct Player {
     pub world: String,
 }
 
-pub async fn pocketbase_send(query: Player, pb_email: String, pb_password: String) -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = pocketbase_sdk::client::Client::new("https://pocketbase.selfhostable.net/api/").unwrap();
-    let auth = client.auth_via_email(pb_email, pb_password, UserTypes::Admin /* use UserTypes::Admin for admin Authentication */).await;
+pub async fn pocketbase_send(
+    query: Player,
+    pb_email: String,
+    pb_password: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut client =
+        pocketbase_sdk::client::Client::new("https://pocketbase.selfhostable.net/api/").unwrap();
+    let auth = client
+        .auth_via_email(
+            pb_email,
+            pb_password,
+            UserTypes::Admin, /* use UserTypes::Admin for admin Authentication */
+        )
+        .await;
     assert!(auth.is_ok());
 
     create::record::<Player>("global", &query, &client).await?;
