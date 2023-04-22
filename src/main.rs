@@ -214,7 +214,7 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
         a_divisor = 8.0;
         b_divisor = 8.0;
     }
-    for (region_name, region) in &config.regions {
+    for (_region_name, region) in &config.regions {
         if player.x >= region.a[0] as f64 / a_divisor
             && player.x <= region.b[0] as f64 / b_divisor
             && player.z >= region.a[1] as f64 / a_divisor
