@@ -37,6 +37,7 @@ struct Player {
     x: f64,
     z: f64,
     world: String,
+    region: String,
 }
 
 #[tokio::main]
@@ -96,7 +97,7 @@ async fn main_function() -> anyhow::Result<()> {
     let url: String = format!("{}up/world/{}/0", config.server, &config.world);
 
     let raw_json = get_request(url).await?;
-    let player_info = extract_player_info(raw_json.clone());
+    let player_info = extract_player_info(raw_json.clone(), &config);
 
     for player in &player_info {
         println!(
@@ -154,8 +155,8 @@ async fn main_function() -> anyhow::Result<()> {
                         &http,
                         channel_id,
                         format!(
-                            "{} has entered our land! In {} <@&1084742210265813002>",
-                            player.account, player.world
+                            "{} has entered our land, at the location {}! In {} <@&1084742210265813002>",
+                            player.account, player.world, player.region
                         ),
                     )
                     .await;
@@ -186,7 +187,7 @@ async fn get_request(url: String) -> Result<String> {
     Ok(body)
 }
 
-fn extract_player_info(json_string: String) -> Vec<Player> {
+fn extract_player_info(json_string: String, config: &Configuration) -> Vec<Player> {
     let parsed_json = serde_json::from_str::<serde_json::Value>(&json_string).unwrap();
     let players = parsed_json["players"].as_array().unwrap();
 
@@ -196,11 +197,27 @@ fn extract_player_info(json_string: String) -> Vec<Player> {
         let x = player["x"].as_f64().unwrap();
         let z = player["z"].as_f64().unwrap();
         let world = player["world"].as_str().unwrap().to_owned();
+        let check_player_region_name = check_player_region(
+            &Player {
+                account: account.clone(),
+                x: x,
+                z: z,
+                world: world.clone(),
+                region: "".to_string(),
+            },
+            config,
+        );
+        let region = if check_player_region_name.len() > 0 {
+            check_player_region_name[0].clone()
+        } else {
+            "".to_string()
+        };
         result.push(Player {
             account,
             x,
             z,
             world,
+            region,
         });
     }
 
@@ -221,6 +238,26 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
             && player.z <= region.b[1] as f64 / b_divisor
         {
             in_our_land.push(player.account.clone());
+            break; // Assuming player can only be in one region at a time
+        }
+    }
+    in_our_land
+}
+
+fn check_player_region_name(player: &Player, config: &Configuration) -> Vec<String> {
+    let mut in_our_land = Vec::new();
+    let (mut a_divisor, mut b_divisor) = (1.0, 1.0);
+    if player.world == "world_nether" {
+        a_divisor = 8.0;
+        b_divisor = 8.0;
+    }
+    for (region_name, region) in &config.regions {
+        if player.x >= region.a[0] as f64 / a_divisor
+            && player.x <= region.b[0] as f64 / b_divisor
+            && player.z >= region.a[1] as f64 / a_divisor
+            && player.z <= region.b[1] as f64 / b_divisor
+        {
+            in_our_land.push(region_name.clone());
             break; // Assuming player can only be in one region at a time
         }
     }
