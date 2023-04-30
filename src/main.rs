@@ -117,7 +117,9 @@ async fn main_function() -> anyhow::Result<()> {
             z: player.z,
             world: player.world.clone(),
         };
-        pocketbase_send(data, pb_email.clone(), pb_password.clone()).await;
+        pocketbase_send(data, pb_email.clone(), pb_password.clone())
+            .await
+            .expect("Error sending to pocketbase database");
     }
 
     let in_our_land: Vec<String> = player_info
@@ -177,7 +179,9 @@ async fn main_function() -> anyhow::Result<()> {
             }
         }
     }
-    conn.close();
+    if let Err(_e) = conn.close() {
+        println!("Failed to close database");
+    }
 
     Ok(())
 }
@@ -197,11 +201,11 @@ fn extract_player_info(json_string: String, config: &Configuration) -> Vec<Playe
         let x = player["x"].as_f64().unwrap();
         let z = player["z"].as_f64().unwrap();
         let world = player["world"].as_str().unwrap().to_owned();
-        let check_player_region_name = check_player_region(
+        let check_player_region_name = check_player_region_name(
             &Player {
                 account: account.clone(),
-                x: x,
-                z: z,
+                x,
+                z,
                 world: world.clone(),
                 region: "".to_string(),
             },
