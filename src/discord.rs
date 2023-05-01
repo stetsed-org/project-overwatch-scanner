@@ -1,9 +1,18 @@
-use serenity::{http::Http, model::id::ChannelId};
+use serenity::{http::Http, model::id::ChannelId, model::Timestamp};
 
 pub async fn send_message_to_channel(http: &Http, channel_id: ChannelId, content: String) {
-    let result = channel_id.say(&http, content).await;
+    let msg = channel_id
+        .send_message(&http, |m| {
+            m.content("Overwatch-Notification").embed(|e| {
+                e.title("Overwatch Notification")
+                    .description(&content)
+                    .footer(|f| f.text("Project Overwatch"))
+                    .timestamp(Timestamp::now())
+            })
+        })
+        .await;
 
-    match result {
+    match msg {
         Err(why) => {
             println!("Error sending message: {:?}", why);
         }
