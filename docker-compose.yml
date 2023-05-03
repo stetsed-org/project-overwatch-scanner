@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  scanner:
+    image: ghcr.io/stetsed-org/project-overwatch-scanner
+    env_file:
+      - .env
+    volumes:
+      - ./configuration.json:/app/configuration.json
