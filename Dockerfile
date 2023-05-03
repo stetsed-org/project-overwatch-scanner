@@ -6,7 +6,7 @@ COPY . .
 
 RUN cargo build --release
 
-FROM archlinux:latest as run
+FROM debian:bullseye-slim as run
 
 WORKDIR /app
 
