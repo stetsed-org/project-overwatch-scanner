@@ -12,8 +12,6 @@ WORKDIR /app
 
 COPY --from=build /app/target/release/project-overwatch-scanner .
 
-VOLUME /app/data
-
-CMD [ "cd /app/data && ../project-overwatch-scanner" ]
+CMD [ "./project-overwatch-scanner" ]
 
 
