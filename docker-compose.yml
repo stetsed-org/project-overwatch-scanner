@@ -11,7 +11,7 @@ services:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_SCHEDULE=0 0 * * * *
   scanner:
-    image: ghcr.io/stetsed-org/project-overwatch-scanner
+    image: ghcr.io/stetsed-org/project-overwatch-scanner:main
     env_file:
       - .env
     volumes:
