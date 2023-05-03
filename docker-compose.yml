@@ -3,6 +3,7 @@ version: "3"
 services:
   watchtower:
     image: containrrr/watchtower
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -11,6 +12,7 @@ services:
       - WATCHTOWER_SCHEDULE=0 0 * * * *
   scanner:
     image: ghcr.io/stetsed-org/project-overwatch-scanner:main
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
