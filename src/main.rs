@@ -4,6 +4,7 @@ mod sql;
 
 use anyhow::Result;
 use dotenv::dotenv;
+use pocketbase_sdk::user::UserTypes;
 use serde::{Deserialize, Serialize};
 use serenity::http::Http;
 use serenity::model::id::ChannelId;
@@ -70,6 +71,15 @@ async fn main_function() -> anyhow::Result<()> {
 
     let conn = Connection::open("main.db")?;
 
+    let mut client = pocketbase_sdk::client::Client::new(&pb_api_route).unwrap();
+    let _auth = client
+        .auth_via_email(
+            pb_email,
+            pb_password,
+            UserTypes::Admin, /* use UserTypes::Admin for admin Authentication */
+        )
+        .await;
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS active (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,14 +129,9 @@ async fn main_function() -> anyhow::Result<()> {
             z: player.z,
             world: player.world.clone(),
         };
-        pocketbase_send(
-            data,
-            pb_email.clone(),
-            pb_password.clone(),
-            pb_api_route.clone(),
-        )
-        .await
-        .expect("Error sending to pocketbase database");
+        pocketbase_send(data, &client)
+            .await
+            .expect("Error sending to pocketbase database");
     }
 
     let in_our_land: Vec<String> = player_info
