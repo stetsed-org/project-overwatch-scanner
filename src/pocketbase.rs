@@ -14,9 +14,9 @@ pub async fn pocketbase_send(
     query: Player,
     pb_email: String,
     pb_password: String,
+    pb_api_route: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut client =
-        pocketbase_sdk::client::Client::new("https://pocketbase.selfhostable.net/api/").unwrap();
+    let mut client = pocketbase_sdk::client::Client::new(&pb_api_route).unwrap();
     let auth = client
         .auth_via_email(
             pb_email,

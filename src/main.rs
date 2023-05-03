@@ -63,6 +63,8 @@ async fn main_function() -> anyhow::Result<()> {
         env::var("POCKETBASE_EMAIL").expect("Expected a pocketbase email in the environment");
     let pb_password: String =
         env::var("POCKETBASE_PASSWORD").expect("Expected a pocketbase password in the environment");
+    let pb_api_route: String = env::var("POCKETBASE_API_ROUTE")
+        .expect("Expected a pocketbase api route in the environment");
 
     let http = Http::new(&token);
 
@@ -117,9 +119,14 @@ async fn main_function() -> anyhow::Result<()> {
             z: player.z,
             world: player.world.clone(),
         };
-        pocketbase_send(data, pb_email.clone(), pb_password.clone())
-            .await
-            .expect("Error sending to pocketbase database");
+        pocketbase_send(
+            data,
+            pb_email.clone(),
+            pb_password.clone(),
+            pb_api_route.clone(),
+        )
+        .await
+        .expect("Error sending to pocketbase database");
     }
 
     let in_our_land: Vec<String> = player_info
