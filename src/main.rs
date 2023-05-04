@@ -60,30 +60,6 @@ async fn main() -> Result<()> {
     let pb_api_route: String = env::var("POCKETBASE_API_ROUTE")
         .expect("Expected a pocketbase api route in the environment");
 
-    loop {
-        main_function(
-            token.clone(),
-            channel_id.clone(),
-            pb_email.clone(),
-            pb_password.clone(),
-            pb_api_route.clone(),
-        )
-        .await?;
-        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-    }
-}
-
-async fn main_function(
-    token: String,
-    channel_id: ChannelId,
-    pb_email: String,
-    pb_password: String,
-    pb_api_route: String,
-) -> anyhow::Result<()> {
-    let http = Http::new(&token);
-
-    let conn = Connection::open("main.db")?;
-
     let mut client = pocketbase_sdk::client::Client::new(&pb_api_route).unwrap();
     let _auth = client
         .auth_via_email(
@@ -92,6 +68,21 @@ async fn main_function(
             UserTypes::Admin, /* use UserTypes::Admin for admin Authentication */
         )
         .await;
+
+    loop {
+        main_function(token.clone(), channel_id.clone(), &client).await?;
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    }
+}
+
+async fn main_function(
+    token: String,
+    channel_id: ChannelId,
+    client: &pocketbase_sdk::client::Client,
+) -> anyhow::Result<()> {
+    let http = Http::new(&token);
+
+    let conn = Connection::open("main.db")?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS active (
