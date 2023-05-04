@@ -43,19 +43,12 @@ struct Player {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    loop {
-        main_function().await?;
-        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-    }
-}
-
-async fn main_function() -> anyhow::Result<()> {
     dotenv().ok();
 
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let channel_id_str =
+    let token: String = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let channel_id_str: String =
         env::var("DISCORD_CHANNEL_ID").expect("Expected a channel ID in the environment");
-    let channel_id = ChannelId(
+    let channel_id: ChannelId = ChannelId(
         channel_id_str
             .parse::<u64>()
             .expect("Couldn't parse channel ID"),
@@ -67,6 +60,26 @@ async fn main_function() -> anyhow::Result<()> {
     let pb_api_route: String = env::var("POCKETBASE_API_ROUTE")
         .expect("Expected a pocketbase api route in the environment");
 
+    loop {
+        main_function(
+            token.clone(),
+            channel_id.clone(),
+            pb_email.clone(),
+            pb_password.clone(),
+            pb_api_route.clone(),
+        )
+        .await?;
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    }
+}
+
+async fn main_function(
+    token: String,
+    channel_id: ChannelId,
+    pb_email: String,
+    pb_password: String,
+    pb_api_route: String,
+) -> anyhow::Result<()> {
     let http = Http::new(&token);
 
     let conn = Connection::open("main.db")?;
