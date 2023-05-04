@@ -69,19 +69,6 @@ async fn main() -> Result<()> {
         )
         .await;
 
-    loop {
-        main_function(token.clone(), channel_id.clone(), &client).await?;
-        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-    }
-}
-
-async fn main_function(
-    token: String,
-    channel_id: ChannelId,
-    client: &pocketbase_sdk::client::Client,
-) -> anyhow::Result<()> {
-    let http = Http::new(&token);
-
     let conn = Connection::open("main.db")?;
 
     conn.execute(
@@ -105,6 +92,20 @@ async fn main_function(
         )",
         (),
     )?;
+
+    loop {
+        main_function(token.clone(), channel_id.clone(), &client, &conn).await?;
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    }
+}
+
+async fn main_function(
+    token: String,
+    channel_id: ChannelId,
+    client: &pocketbase_sdk::client::Client,
+    conn: &Connection,
+) -> anyhow::Result<()> {
+    let http = Http::new(&token);
 
     let contents: String = fs::read_to_string("./configuration.json")?;
 
@@ -194,9 +195,6 @@ async fn main_function(
                 }
             }
         }
-    }
-    if let Err(_e) = conn.close() {
-        println!("Failed to close database");
     }
 
     Ok(())
