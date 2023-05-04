@@ -170,7 +170,7 @@ async fn main_function() -> anyhow::Result<()> {
                         channel_id,
                         format!(
                             "{} has entered our land, at the location {}! In {} <@&1084742210265813002>",
-                            player.account, player.world, player.region
+                            player.account, player.region, player.world
                         ),
                     )
                     .await;

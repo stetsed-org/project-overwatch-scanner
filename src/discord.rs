@@ -3,7 +3,7 @@ use serenity::{http::Http, model::id::ChannelId, model::Timestamp};
 pub async fn send_message_to_channel(http: &Http, channel_id: ChannelId, content: String) {
     let msg = channel_id
         .send_message(&http, |m| {
-            m.content("Overwatch-Notification").embed(|e| {
+            m.content("").embed(|e| {
                 e.title("Overwatch Notification")
                     .description(&content)
                     .footer(|f| f.text("Project Overwatch"))
