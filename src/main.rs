@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
     )?;
 
     loop {
-        main_function(token.clone(), channel_id.clone(), &client, &conn).await?;
+        main_function(token.clone(), channel_id, &client, &conn).await?;
         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
     }
 }
@@ -122,7 +122,7 @@ async fn main_function(
             player.account, player.x, player.z
         );
         insert_entry(
-            &conn,
+            conn,
             player.account.clone(),
             player.x as i64,
             player.z as i64,
@@ -134,7 +134,7 @@ async fn main_function(
             z: player.z,
             world: player.world.clone(),
         };
-        pocketbase_send(data, &client)
+        pocketbase_send(data, client)
             .await
             .expect("Error sending to pocketbase database");
     }
@@ -149,50 +149,48 @@ async fn main_function(
     for player in &player_info {
         if config.allylist.contains(&player.account) {
             continue;
+        } else if in_our_land.contains(&player.account) {
+            let player_already_active = player_in_active(conn, &player.account).await?;
+            if player_already_active {
+                insert_active_entry(
+                    conn,
+                    player.account.clone(),
+                    player.x as i64,
+                    player.z as i64,
+                )
+                .await?;
+            }
+            if !player_already_active {
+                print!("Somebody has entered our land hook.");
+                insert_active_entry(
+                    conn,
+                    player.account.clone(),
+                    player.x as i64,
+                    player.z as i64,
+                )
+                .await?;
+                send_message_to_channel(
+                    &http,
+                    channel_id,
+                    format!(
+                        "{} has entered our land, at the location {}! In {} <@&1084742210265813002>",
+                        player.account, player.region, player.world
+                    ),
+                )
+                .await;
+            }
         } else {
-            if in_our_land.contains(&player.account) {
-                let player_already_active = player_in_active(&conn, &player.account).await?;
-                if player_already_active {
-                    insert_active_entry(
-                        &conn,
-                        player.account.clone(),
-                        player.x as i64,
-                        player.z as i64,
-                    )
-                    .await?;
-                }
-                if !player_already_active {
-                    print!("Somebody has entered our land hook.");
-                    insert_active_entry(
-                        &conn,
-                        player.account.clone(),
-                        player.x as i64,
-                        player.z as i64,
-                    )
-                    .await?;
-                    send_message_to_channel(
-                        &http,
-                        channel_id,
-                        format!(
-                            "{} has entered our land, at the location {}! In {} <@&1084742210265813002>",
-                            player.account, player.region, player.world
-                        ),
-                    )
-                    .await;
-                }
-            } else {
-                let player_already_active = player_in_active(&conn, &player.account).await?;
-                if player_already_active {
-                    print!("Somebody has left our land hook.");
-                    print!("Put Image Logic Here to Download from database and render.");
-                    delete_in_active(&conn, &player.account).await?;
-                    send_message_to_channel(
-                        &http,
-                        channel_id,
-                        format!("{} has left our land!", player.account),
-                    )
-                    .await;
-                }
+            let player_already_active = player_in_active(conn, &player.account).await?;
+            if player_already_active {
+                print!("Somebody has left our land hook.");
+                print!("Put Image Logic Here to Download from database and render.");
+                delete_in_active(conn, &player.account).await?;
+                send_message_to_channel(
+                    &http,
+                    channel_id,
+                    format!("{} has left our land!", player.account),
+                )
+                .await;
             }
         }
     }
@@ -225,7 +223,7 @@ fn extract_player_info(json_string: String, config: &Configuration) -> Vec<Playe
             },
             config,
         );
-        let region = if check_player_region_name.len() > 0 {
+        let region = if !check_player_region_name.is_empty() {
             check_player_region_name[0].clone()
         } else {
             "".to_string()
@@ -249,7 +247,7 @@ fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
         a_divisor = 8.0;
         b_divisor = 8.0;
     }
-    for (_region_name, region) in &config.regions {
+    for region in config.regions.values() {
         if player.x >= region.a[0] as f64 / a_divisor
             && player.x <= region.b[0] as f64 / b_divisor
             && player.z >= region.a[1] as f64 / a_divisor

@@ -12,10 +12,7 @@ pub async fn send_message_to_channel(http: &Http, channel_id: ChannelId, content
         })
         .await;
 
-    match msg {
-        Err(why) => {
-            println!("Error sending message: {:?}", why);
-        }
-        _ => (),
+    if let Err(why) = msg {
+        println!("Error sending message: {:?}", why);
     }
 }

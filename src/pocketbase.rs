@@ -14,6 +14,6 @@ pub async fn pocketbase_send(
     query: Player,
     client: &client::Client,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    create::record::<Player>("global", &query, &client).await?;
+    create::record::<Player>("global", &query, client).await?;
     Ok(())
 }
