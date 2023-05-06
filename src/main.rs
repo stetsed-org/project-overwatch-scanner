@@ -142,7 +142,7 @@ async fn main_function(
     for player in &player_info {
         if config.allylist.contains(&player.account) {
             continue;
-        } else if player.region.is_empty() {
+        } else if !player.region.is_empty() {
             let player_already_active = player_in_active(conn, &player.account).await?;
             if player_already_active {
                 insert_active_entry(
