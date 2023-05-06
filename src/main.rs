@@ -118,8 +118,8 @@ async fn main_function(
 
     for player in &player_info {
         println!(
-            "Account: {}, X: {}, Z: {}",
-            player.account, player.x, player.z
+            "Account: {}, X: {}, Z: {}, Region: {}",
+            player.account, player.x, player.z, player.region
         );
         insert_entry(
             conn,
@@ -139,17 +139,10 @@ async fn main_function(
             .expect("Error sending to pocketbase database");
     }
 
-    let in_our_land: Vec<String> = player_info
-        .iter()
-        .flat_map(|player| check_player_region(player, &config))
-        .collect();
-
-    println!("{:?}", in_our_land);
-
     for player in &player_info {
         if config.allylist.contains(&player.account) {
             continue;
-        } else if in_our_land.contains(&player.account) {
+        } else if player.region.is_empty() {
             let player_already_active = player_in_active(conn, &player.account).await?;
             if player_already_active {
                 insert_active_entry(
@@ -238,26 +231,6 @@ fn extract_player_info(json_string: String, config: &Configuration) -> Vec<Playe
     }
 
     result
-}
-
-fn check_player_region(player: &Player, config: &Configuration) -> Vec<String> {
-    let mut in_our_land = Vec::new();
-    let (mut a_divisor, mut b_divisor) = (1.0, 1.0);
-    if player.world == "world_nether" {
-        a_divisor = 8.0;
-        b_divisor = 8.0;
-    }
-    for region in config.regions.values() {
-        if player.x >= region.a[0] as f64 / a_divisor
-            && player.x <= region.b[0] as f64 / b_divisor
-            && player.z >= region.a[1] as f64 / a_divisor
-            && player.z <= region.b[1] as f64 / b_divisor
-        {
-            in_our_land.push(player.account.clone());
-            break; // Assuming player can only be in one region at a time
-        }
-    }
-    in_our_land
 }
 
 fn check_player_region_name(player: &Player, config: &Configuration) -> Vec<String> {

@@ -1,0 +1,21 @@
+{
+  "channel": "(Channel to Send to)",
+  "server": "(Dynmap URL)",
+  "world": "world",
+  "allylist": [
+    "Ally1",
+    "Ally2"
+  ],
+  "regions": {
+    "Area1": {
+      "a": [
+        6709,
+        -456
+      ],
+      "b": [
+        7033,
+        -389
+      ]
+    },
+  }
+}
