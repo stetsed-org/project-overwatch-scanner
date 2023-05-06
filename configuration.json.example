@@ -1,6 +1,6 @@
 {
   "channel": "(Channel to Send to)",
-  "server": "(Dynmap URL)",
+  "server": "https://example.com:6969",
   "world": "world",
   "allylist": [
     "Ally1",
